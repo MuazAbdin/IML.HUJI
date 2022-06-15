@@ -3,7 +3,6 @@ from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
 from numpy.linalg import pinv
-from IMLearn.metrics.loss_functions import mean_square_error
 
 
 class LinearRegression(BaseEstimator):
@@ -53,7 +52,8 @@ class LinearRegression(BaseEstimator):
         n_samples, n_features = X.shape
         if self.include_intercept_:
             # Pad the matrix with a left column of ones
-            X = np.pad(X, pad_width=((0, 0), (1, 0)), mode='constant', constant_values=1)
+            # X = np.pad(X, pad_width=((0, 0), (1, 0)), mode='constant', constant_values=1)
+            X = np.c_[np.ones(len(X)), X]
             assert X.shape == (n_samples, n_features + 1)
         self.coefs_ = pinv(X) @ y
         if self.include_intercept_:
@@ -73,10 +73,13 @@ class LinearRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        n_samples, n_features = X.shape
-        w = self.coefs_[1:] if self.include_intercept_ else self.coefs_
-        assert w.shape == (n_features,)
-        return X @ w
+        # n_samples, n_features = X.shape
+        # w = self.coefs_[1:] if self.include_intercept_ else self.coefs_
+        # assert w.shape == (n_features,)
+        # return X @ w
+        if self.include_intercept_:
+            X = np.c_[np.ones(len(X)), X]
+        return X @ self.coefs_
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -95,4 +98,5 @@ class LinearRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        return mean_square_error(y, self._predict(X))
+        from IMLearn.metrics.loss_functions import mean_square_error
+        return mean_square_error(y_true=y, y_pred=self._predict(X))
