@@ -77,4 +77,10 @@ def cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     Cross entropy of given predictions
     """
-    raise NotImplementedError()
+    epsilon = 1e-5
+    y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
+    dup_y_true = np.zeros_like(y_pred)
+    dup_y_true[np.arange(len(y_pred)), y_true] = 1
+    return np.sum(-(dup_y_true * np.log(y_pred)), axis=1)
+
+

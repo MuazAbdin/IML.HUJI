@@ -38,18 +38,30 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
     validation_score: float
         Average validation score over folds
     """
-    print(X.size)
-    print(y.size)
-    groups = np.remainder(np.arange(y.size), cv)
-    train_score, validation_score = 0.0, 0.0
-    for k in range(cv):
-        train_X, train_y = X[groups != k], y[groups != k]
-        validate_X, validate_y = X[groups == k], y[groups == k]
-        est = deepcopy(estimator).fit(train_X, train_y)
-        train_score += scoring(train_y, est.predict(train_X))
-        validation_score += scoring(validate_y, est.predict(validate_X))
+    ids = np.arange(X.shape[0])
+
+    # Randomly split samples into `cv` folds
+    folds = np.array_split(ids, cv)
+    train_score, validation_score = .0, .0
+    for fold_ids in folds:
+        train_msk = ~np.isin(ids, fold_ids)
+        fit = deepcopy(estimator).fit(X[train_msk], y[train_msk])
+
+        train_score += scoring(y[train_msk], fit.predict(X[train_msk]))
+        validation_score += scoring(y[fold_ids], fit.predict(X[fold_ids]))
 
     return train_score / cv, validation_score / cv
+
+    # groups = np.remainder(np.arange(y.size), cv)
+    # train_score, validation_score = 0.0, 0.0
+    # for k in range(cv):
+    #     train_X, train_y = X[groups != k], y[groups != k]
+    #     validate_X, validate_y = X[groups == k], y[groups == k]
+    #     est = deepcopy(estimator).fit(train_X, train_y)
+    #     train_score += scoring(train_y, est.predict(train_X))
+    #     validation_score += scoring(validate_y, est.predict(validate_X))
+    #
+    # return train_score / cv, validation_score / cv
 
     # X_folds, y_folds = np.array_split(X, cv), np.array_split(y, cv)
     # train_score, validation_score = 0.0, 0.0

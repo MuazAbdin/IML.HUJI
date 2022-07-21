@@ -119,4 +119,37 @@ class GradientDescent:
                 Euclidean norm of w^(t)-w^(t-1)
 
         """
-        raise NotImplementedError()
+        from copy import deepcopy
+        # n_samples, n_features = X.shape
+        # f.weights = np.random.uniform(low=-25, high=25, size=(n_features,))
+        out_vals = [deepcopy(f.weights), deepcopy(f.weights), deepcopy(f.weights)]
+        # last_w, best_w, avg_w = out_vals[0], out_vals[1], out_vals[2]
+        best_f_val = f.compute_output(X=X, y=y)
+
+        t = 1
+        while t <= self.max_iter_:
+            # print(t)
+            prev_weights = deepcopy(f.weights)
+            eta = self.learning_rate_.lr_step(t=t)
+            grad = f.compute_jacobian(X=X, y=y)
+            f.weights -= eta * grad
+            val = f.compute_output(X=X, y=y)
+            out_vals[0] = deepcopy(f.weights)
+            if val < best_f_val:
+                out_vals[1] = deepcopy(f.weights)
+                best_f_val = val
+            out_vals[2] += f.weights
+            delta = np.linalg.norm(f.weights-prev_weights)
+            self.callback_(solver=self, weights=deepcopy(f.weights), val=val, grad=grad, t=t,
+                           eta=eta, delta=delta)
+            if delta <= self.tol_:
+                break
+            t += 1
+
+        out_vals[2] /= t
+        # print(out_vals)
+        # print(out_vals[OUTPUT_VECTOR_TYPE.index(self.out_type_)])
+        # print("---")
+        return out_vals[OUTPUT_VECTOR_TYPE.index(self.out_type_)]
+
+
