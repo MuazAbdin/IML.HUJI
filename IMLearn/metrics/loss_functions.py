@@ -84,3 +84,17 @@ def cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return np.sum(-(dup_y_true * np.log(y_pred)), axis=1)
 
 
+def softmax(X: np.ndarray) -> np.ndarray:
+    """
+    Compute the Softmax function for each sample in given data
+
+    Parameters:
+    -----------
+    X: ndarray of shape (n_samples, n_features)
+
+    Returns:
+    --------
+    output: ndarray of shape (n_samples, n_features)
+        Softmax(x) for every sample x in given data X
+    """
+    raise NotImplementedError()
